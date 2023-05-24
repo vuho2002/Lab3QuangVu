@@ -1,15 +1,15 @@
 package quangvu.example.demo.controller;
+import jakarta.validation.Valid;
+import org.springframework.data.convert.ValueConverter;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import quangvu.example.demo.entity.Book;
 import quangvu.example.demo.service.BookService;
 import quangvu.example.demo.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class BookController {
     private CategoryService categoryService;
 
     @GetMapping
-    public String showAllBooks(Model model){
+    public String showAllBooks(Model model) {
         List<Book> books = bookService.getAllBooks();
         model.addAttribute("books", books);
 
@@ -31,15 +31,44 @@ public class BookController {
     }
 
     @GetMapping("/add")
-    public String addBookForm(Model model){
+    public String addBookForm(Model model) {
         model.addAttribute("book", new Book());
         model.addAttribute("categories", categoryService.getAllCategories());
 
         return "book/add";
     }
+
     @PostMapping("/add")
-    public String addBook(@ModelAttribute("book") Book book){
+    public String addBook(@Valid @ModelAttribute("book") Book book, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "book/add";
+        }
         bookService.addBook(book);
+        return "redirect:/books";
+    }
+    @GetMapping("/delete/{id}")
+    public String deleteBook(@PathVariable("id") Long id) {
+        bookService.deleteBook(id);
+        return "redirect:/books";
+    }
+    @GetMapping("/edit/{id}")
+    public String editBookForm(@PathVariable("id") Long id, Model model) {
+        Book book = bookService.getBookById(id);
+        model.addAttribute("book", book);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "book/edit";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String editBook(@PathVariable("id") Long id, @Valid @ModelAttribute("book") Book book,
+                           BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "book/edit";
+        }
+        book.setId(id);
+        bookService.updateBook(book);
         return "redirect:/books";
     }
 }
