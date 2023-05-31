@@ -1,15 +1,15 @@
 package quangvu.example.demo.controller;
 import jakarta.validation.Valid;
-import org.springframework.data.convert.ValueConverter;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 import quangvu.example.demo.entity.Book;
-import quangvu.example.demo.service.BookService;
-import quangvu.example.demo.service.CategoryService;
+
+import quangvu.example.demo.services.BookService;
+import quangvu.demo.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
+import org.springframework.stereotype.Controller;
+
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class BookController {
     private CategoryService categoryService;
 
     @GetMapping
-    public String showAllBooks(Model model) {
+    public String showAllBooks(Model model){
         List<Book> books = bookService.getAllBooks();
         model.addAttribute("books", books);
 
@@ -31,16 +31,15 @@ public class BookController {
     }
 
     @GetMapping("/add")
-    public String addBookForm(Model model) {
+    public String addBookForm(Model model){
         model.addAttribute("book", new Book());
         model.addAttribute("categories", categoryService.getAllCategories());
 
         return "book/add";
     }
-
     @PostMapping("/add")
-    public String addBook(@Valid @ModelAttribute("book") Book book, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
+    public String addBook(@Valid @ModelAttribute("book") Book book, BindingResult bindingResult, Model model){
+        if(bindingResult.hasErrors()){
             model.addAttribute("categories", categoryService.getAllCategories());
             return "book/add";
         }
@@ -72,4 +71,3 @@ public class BookController {
         return "redirect:/books";
     }
 }
-
